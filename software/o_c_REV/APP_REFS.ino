@@ -304,19 +304,6 @@ public:
 
           switch(get_voltage_scaling()){
           /* can't use pow (busts the available memory at this point), so we unroll ... */
-            case 0: // 1V/octave
-              auto_target_frequencies_[0]  =  target_frequency * 0.125f;  // -3V
-              auto_target_frequencies_[1]  =  target_frequency * 0.25f;   // -2V 
-              auto_target_frequencies_[2]  =  target_frequency * 0.5f;    // -1V 
-              auto_target_frequencies_[3]  =  target_frequency * 1.0f;    // 0V
-              auto_target_frequencies_[4]  =  target_frequency * 2.0f;    // +1V 
-              auto_target_frequencies_[5]  =  target_frequency * 4.0f;    // +2V 
-              auto_target_frequencies_[6]  =  target_frequency * 8.0f;    // +3V 
-              auto_target_frequencies_[7]  =  target_frequency * 16.0f;   // +4V 
-              auto_target_frequencies_[8]  =  target_frequency * 32.0f;   // +5V 
-              auto_target_frequencies_[9]  =  target_frequency * 64.0f;   // +6V 
-              auto_target_frequencies_[10] =  target_frequency * 128.0f;  // ...
-              break;
             case 1: // 1.2V/octave
               auto_target_frequencies_[0]  =  target_frequency * 0.1767766952966368931843f;  // -3V = 2**(-3.0/1.2)
               auto_target_frequencies_[1]  =  target_frequency * 0.3149802624737182976666f;  // -2V = 2**(-2.0/1.2)
@@ -343,7 +330,19 @@ public:
               auto_target_frequencies_[9]  =  target_frequency * 8.0f;                       // +6V = 2**(6.0/2.0)
               auto_target_frequencies_[10] =  target_frequency * 11.3137084989847611637970f; // ...
               break;
+            case 0: // 1V/octave
             default:
+              auto_target_frequencies_[0]  =  target_frequency * 0.125f;  // -3V
+              auto_target_frequencies_[1]  =  target_frequency * 0.25f;   // -2V 
+              auto_target_frequencies_[2]  =  target_frequency * 0.5f;    // -1V 
+              auto_target_frequencies_[3]  =  target_frequency * 1.0f;    // 0V
+              auto_target_frequencies_[4]  =  target_frequency * 2.0f;    // +1V 
+              auto_target_frequencies_[5]  =  target_frequency * 4.0f;    // +2V 
+              auto_target_frequencies_[6]  =  target_frequency * 8.0f;    // +3V 
+              auto_target_frequencies_[7]  =  target_frequency * 16.0f;   // +4V 
+              auto_target_frequencies_[8]  =  target_frequency * 32.0f;   // +5V 
+              auto_target_frequencies_[9]  =  target_frequency * 64.0f;   // +6V 
+              auto_target_frequencies_[10] =  target_frequency * 128.0f;  // ...
               break;
           }
           
@@ -895,10 +894,14 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
   graphics.drawHLine(start_x + 16, y, 8);
   graphics.drawBitmap8(start_x + 28, 34 - unscaled_octave * 2 - 1, OC::kBitmapLoopMarkerW, OC::bitmap_loop_markers_8 + OC::kBitmapLoopMarkerW); // was 60
 
+  octave -= OC::DAC::kOctaveZero;
+
   // Try and round to 3 digits
   switch (references_app.channels_[chan].get_voltage_scaling()) {
       case 1: // 1.2V/oct
           semitone = (semitone * 10000 + 40) / 100;
+          // fudge
+          if (octave < 0) semitone -= 1000;
           break;
       case 2: // 2V/oct
       default: // 1V/oct
@@ -907,7 +910,6 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
     }
   
   semitone %= 1000;
-  octave -= OC::DAC::kOctaveZero;
 
 
   // We want [sign]d.ddd = 6 chars in 32px space; with the current font width
