@@ -301,19 +301,51 @@ public:
             average += history[i];
           // ... and derive target frequencies
           float target_frequency = ((auto_frequency_ + average) / (float)(kHistoryDepth + 1)); // 0V
-          
-          /* can't use pow ( thus busts the available memory at this point), so we unroll ... */
-          auto_target_frequencies_[0]  =  target_frequency * 0.125f;  // -3V
-          auto_target_frequencies_[1]  =  target_frequency * 0.25f;   // -2V 
-          auto_target_frequencies_[2]  =  target_frequency * 0.5f;    // -1V 
-          auto_target_frequencies_[3]  =  target_frequency * 1.0f;    // 0V
-          auto_target_frequencies_[4]  =  target_frequency * 2.0f;    // +1V 
-          auto_target_frequencies_[5]  =  target_frequency * 4.0f;    // +2V 
-          auto_target_frequencies_[6]  =  target_frequency * 8.0f;    // +3V 
-          auto_target_frequencies_[7]  =  target_frequency * 16.0f;   // +4V 
-          auto_target_frequencies_[8]  =  target_frequency * 32.0f;   // +5V 
-          auto_target_frequencies_[9]  =  target_frequency * 64.0f;   // +6V 
-          auto_target_frequencies_[10] =  target_frequency * 128.0f;  // ...
+
+          switch(get_voltage_scaling()){
+          /* can't use pow (busts the available memory at this point), so we unroll ... */
+            case 0: // 1V/octave
+              auto_target_frequencies_[0]  =  target_frequency * 0.125f;  // -3V
+              auto_target_frequencies_[1]  =  target_frequency * 0.25f;   // -2V 
+              auto_target_frequencies_[2]  =  target_frequency * 0.5f;    // -1V 
+              auto_target_frequencies_[3]  =  target_frequency * 1.0f;    // 0V
+              auto_target_frequencies_[4]  =  target_frequency * 2.0f;    // +1V 
+              auto_target_frequencies_[5]  =  target_frequency * 4.0f;    // +2V 
+              auto_target_frequencies_[6]  =  target_frequency * 8.0f;    // +3V 
+              auto_target_frequencies_[7]  =  target_frequency * 16.0f;   // +4V 
+              auto_target_frequencies_[8]  =  target_frequency * 32.0f;   // +5V 
+              auto_target_frequencies_[9]  =  target_frequency * 64.0f;   // +6V 
+              auto_target_frequencies_[10] =  target_frequency * 128.0f;  // ...
+              break;
+            case 1: // 1.2V/octave
+              auto_target_frequencies_[0]  =  target_frequency * 0.1767766952966368931843f;  // -3V = 2**(-3.0/1.2)
+              auto_target_frequencies_[1]  =  target_frequency * 0.3149802624737182976666f;  // -2V = 2**(-2.0/1.2)
+              auto_target_frequencies_[2]  =  target_frequency * 0.5612310241546865086093f;  // -1V = 2**(-1.0/1.2)
+              auto_target_frequencies_[3]  =  target_frequency * 1.0f;                       // 0V = 2**(0.0/1.2)
+              auto_target_frequencies_[4]  =  target_frequency * 1.7817974362806785482150f;  // +1V = 2**(1.0/1.2)
+              auto_target_frequencies_[5]  =  target_frequency * 3.1748021039363991668836f;  // +2V = 2**(2.0/1.2)
+              auto_target_frequencies_[6]  =  target_frequency * 5.6568542494923805818985f;  // +3V = 2**(3.0/1.2)
+              auto_target_frequencies_[7]  =  target_frequency * 10.0793683991589855253324f; // +4V = 2**(4.0/1.2)
+              auto_target_frequencies_[8]  =  target_frequency * 17.9593927729499718282113f; // +5V = 2**(5.0/1.2)
+              auto_target_frequencies_[9]  =  target_frequency * 32.0f;                      // +6V = 2**(6.0/1.2)
+              auto_target_frequencies_[10] =  target_frequency * 57.0175179609817419645879f; // ...
+              break;
+            case 2: // 2V/octave
+              auto_target_frequencies_[0]  =  target_frequency * 0.3535533905932737863687f;  // -3V - 2**(-3.0/2.0)
+              auto_target_frequencies_[1]  =  target_frequency * 0.5f;                       // -2V = 2**(-2.0/2.0)
+              auto_target_frequencies_[2]  =  target_frequency * 0.7071067811865475727373f;  // -1V = 2**(-1.0/2.0)
+              auto_target_frequencies_[3]  =  target_frequency * 1.0f;                       // 0V  = 2**(0.0/2.0)
+              auto_target_frequencies_[4]  =  target_frequency * 1.4142135623730951454746f;  // +1V = 2**(1.0/2.0)
+              auto_target_frequencies_[5]  =  target_frequency * 2.0f;                       // +2V = 2**(2.0/2.0)
+              auto_target_frequencies_[6]  =  target_frequency * 2.8284271247461902909492f;  // +3V = 2**(3.0/2.0)
+              auto_target_frequencies_[7]  =  target_frequency * 4.0f;                       // +4V = 2**(4.0/2.0)
+              auto_target_frequencies_[8]  =  target_frequency * 5.6568542494923805818985f;  // +5V = 2**(5.0/2.0)
+              auto_target_frequencies_[9]  =  target_frequency * 8.0f;                       // +6V = 2**(6.0/2.0)
+              auto_target_frequencies_[10] =  target_frequency * 11.3137084989847611637970f; // ...
+              break;
+            default:
+              break;
+          }
           
           // reset step, and proceed:
           auto_reset_step();
