@@ -899,19 +899,17 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
   // Try and round to 3 digits
   switch (references_app.channels_[chan].get_voltage_scaling()) {
       case 1: // 1.2V/oct
-          semitone = (semitone * 10000 + 40) / 100;
+          semitone = ((semitone * 10000 + 40) / 100) % 1000;
           // fudge
-          if (octave < 0) semitone -= 1000;
+          if (octave == -2) semitone -= 100;
+          if (octave == -3 && semitone != 0) semitone -= 100;
           break;
       case 2: // 2V/oct
       default: // 1V/oct
-          semitone = (semitone * 10000 + 50) / 120;
+          semitone = ((semitone * 10000 + 50) / 120) % 1000;
           break;
     }
   
-  semitone %= 1000;
-
-
   // We want [sign]d.ddd = 6 chars in 32px space; with the current font width
   // of 6px that's too tight, so squeeze in the mini minus...
   y = menu::kTextDy;
