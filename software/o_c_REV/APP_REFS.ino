@@ -894,22 +894,11 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
   graphics.drawHLine(start_x + 16, y, 8);
   graphics.drawBitmap8(start_x + 28, 34 - unscaled_octave * 2 - 1, OC::kBitmapLoopMarkerW, OC::bitmap_loop_markers_8 + OC::kBitmapLoopMarkerW); // was 60
 
-  octave -= OC::DAC::kOctaveZero;
-
   // Try and round to 3 digits
-  switch (references_app.channels_[chan].get_voltage_scaling()) {
-      case 1: // 1.2V/oct
-          semitone = ((semitone * 10000 + 40) / 100) % 1000;
-          // fudge
-          if (octave == -2) semitone -= 100;
-          if (octave == -3 && semitone != 0) semitone -= 100;
-          break;
-      case 2: // 2V/oct
-      default: // 1V/oct
-          semitone = ((semitone * 10000 + 50) / 120) % 1000;
-          break;
-    }
-  
+  semitone = (semitone * 10000 + 50) / 120;
+  semitone %= 1000;
+  octave -= OC::DAC::kOctaveZero;
+ 
   // We want [sign]d.ddd = 6 chars in 32px space; with the current font width
   // of 6px that's too tight, so squeeze in the mini minus...
   y = menu::kTextDy;

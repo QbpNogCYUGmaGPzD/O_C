@@ -46,7 +46,7 @@ OC::UiMode ui_mode = OC::UI_MODE_MENU;
 const bool DUMMY = false;
 
 /* ------------ uncomment for Buchla/non-octaval/quartertone support: -------------------------------  */
-//#define BUCHLA_SUPPORT
+#define BUCHLA_SUPPORT
 
 
 /*  ------------------------ UI timer ISR ---------------------------   */
