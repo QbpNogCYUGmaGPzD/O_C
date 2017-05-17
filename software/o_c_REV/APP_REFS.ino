@@ -29,6 +29,7 @@
 #include "util/util_settings.h"
 #include "OC_autotuner.h"
 #include "src/drivers/FreqMeasure/OC_FreqMeasure.h"
+#include <math.h>
 
 static constexpr double kAaboveMidCtoC0 = 0.03716272234383494188492;
 #define FREQ_MEASURE_TIMEOUT 512
@@ -115,6 +116,7 @@ public:
     reset_calibration_data();
     update_enabled_settings();
     history_[0].Init(0x0);
+    update_enabled_settings();
   }
 
   int get_octave() const {
@@ -536,6 +538,8 @@ public:
     else {
       *settings++ = REF_SETTING_DUMMY;
       *settings++ = REF_SETTING_DUMMY;
+      *settings++ = REF_SETTING_DUMMY;
+      *settings++ = REF_SETTING_DUMMY;
     }
     
     #ifdef BUCHLA_SUPPORT
@@ -842,12 +846,6 @@ void REFS_menu() {
     references_app.autotuner.Draw();
 }
 
-void print_voltage(int octave, int fraction) {
-  graphics.printf("%01d", octave);
-  graphics.movePrintPos(-1, 0); graphics.print('.');
-  graphics.movePrintPos(-2, 0); graphics.printf("%03d", fraction);
-}
-
 void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) const {
 
   // Mostly borrowed from QQ
@@ -867,21 +865,27 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
       case 2: // 2V/oct
           pitch = pitch << 1 ;
           break;
-      default: // 1V/oct
+      case 0: // 1V/oct   
+      default: 
           break;
     }
-
+  
   pitch += (OC::DAC::kOctaveZero * 12) << 7;
   unscaled_pitch += (OC::DAC::kOctaveZero * 12) << 7;
-
   
   CONSTRAIN(pitch, 0, 120 << 7);
 
-  int32_t octave = pitch / (12 << 7);
+  float fpitch = (static_cast<float>(pitch) - static_cast<float>((OC::DAC::kOctaveZero * 12) << 7)) / 1536.0f ;
+  bool fpitch_negative = false ;
+  if (fpitch < 0.0f) {
+    fpitch = -fpitch;
+    fpitch_negative = true;
+  }
+  float fpitch_int = floorf(fpitch);
+  float fpitch_mantissa = fmodf(fpitch, 1.0f) * 1000.0f;
+
   int32_t unscaled_octave = unscaled_pitch / (12 << 7);
-  pitch -= (octave * 12 << 7);
   unscaled_pitch -= (unscaled_octave * 12 << 7);
-  int semitone = pitch >> 7;
   int unscaled_semitone = unscaled_pitch >> 7;
 
   y = 34 - unscaled_semitone * 2; // was 60, multiplier was 4
@@ -894,24 +898,15 @@ void ReferenceChannel::RenderScreensaver(weegfx::coord_t start_x, uint8_t chan) 
   graphics.drawHLine(start_x + 16, y, 8);
   graphics.drawBitmap8(start_x + 28, 34 - unscaled_octave * 2 - 1, OC::kBitmapLoopMarkerW, OC::bitmap_loop_markers_8 + OC::kBitmapLoopMarkerW); // was 60
 
-  // Try and round to 3 digits
-  semitone = (semitone * 10000 + 50) / 120;
-  semitone %= 1000;
-  octave -= OC::DAC::kOctaveZero;
- 
   // We want [sign]d.ddd = 6 chars in 32px space; with the current font width
   // of 6px that's too tight, so squeeze in the mini minus...
   y = menu::kTextDy;
   graphics.setPrintPos(start_x + menu::kIndentDx, y);
-  if (octave >= 0) {
-    print_voltage(octave, semitone);
-  } else {
-    graphics.drawHLine(start_x, y + 3, 2);
-    if (semitone)
-      print_voltage(-octave - 1, 1000 - semitone);
-    else
-      print_voltage(-octave, 0);
-  }
+  if (fpitch_negative) graphics.drawHLine(start_x, y + 3, 2);
+  graphics.printf("%01d", static_cast<uint8_t>(fpitch_int));
+  graphics.movePrintPos(-1, 0); graphics.print('.');
+  graphics.movePrintPos(-2, 0); 
+  graphics.printf("%03d", static_cast<uint16_t>(fpitch_mantissa)) ;
 }
 
 void REFS_screensaver() {
