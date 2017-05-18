@@ -57,6 +57,9 @@ static constexpr unsigned long SETTINGS_SAVE_TIMEOUT_MS = 1000;
 
 /* ------------ uncomment line below to print boot-up and settings saving/restore info to serial ----- */
 //#define PRINT_DEBUG
+/* ------------ uncomment line below to enable printing of autotune data to serial port -------------- */
+/* ------------ note: PRINT_DEBUG must also be defined for AUTOTUNE_DEBUG to work  ------------------- */
+//#define AUTOTUNE_DEBUG
 /* ------------ uncomment line below to enable ASR debug page ---------------------------------------- */
 //#define ASR_DEBUG
 /* ------------ uncomment line below to enable POLYLFO debug page ------------------------------------ */
