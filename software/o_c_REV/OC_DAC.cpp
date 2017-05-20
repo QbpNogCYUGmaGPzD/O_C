@@ -77,10 +77,8 @@ uint8_t DAC::calibration_data_used(uint8_t channel_id) {
 }
 /*static*/
 void DAC::set_auto_channel_calibration_data(uint8_t channel_id) {
-
-#ifdef AUTOTUNE_DEBUG  
-  SERIAL_PRINTLN("use auto calibration data ... (channel: %d)", channel_id + 1);
-#endif
+  
+  //SERIAL_PRINTLN("use auto calibration data ... (channel: %d)", channel_id + 1);
   
   if (channel_id < DAC_CHANNEL_LAST) {
   
@@ -97,10 +95,8 @@ void DAC::set_auto_channel_calibration_data(uint8_t channel_id) {
 }
 /*static*/
 void DAC::set_default_channel_calibration_data(uint8_t channel_id) {
-
-#ifdef AUTOTUNE_DEBUG  
-  SERIAL_PRINTLN("reset to core/default calibration data ... (channel: %d)", channel_id + 1);
-#endif
+  
+  //SERIAL_PRINTLN("reset to core/default calibration data ... (channel: %d)", channel_id + 1);
   
   if (channel_id < DAC_CHANNEL_LAST) {
 
@@ -117,10 +113,8 @@ void DAC::set_default_channel_calibration_data(uint8_t channel_id) {
 }
 /*static*/
 void DAC::update_auto_channel_calibration_data(uint8_t channel_id, int8_t octave, uint32_t pitch_data) {
-
-#ifdef AUTOTUNE_DEBUG  
-  SERIAL_PRINTLN("update: ch.#%d -> %d (%d)", (int)(channel_id + 1), (int)pitch_data, (int)octave);
-#endif
+  
+  //SERIAL_PRINTLN("update: ch.#%d -> %d (%d)", (int)(channel_id + 1), (int)pitch_data, (int)octave);
   
   if (channel_id < DAC_CHANNEL_LAST) {
 
@@ -130,9 +124,7 @@ void DAC::update_auto_channel_calibration_data(uint8_t channel_id, int8_t octave
       // + update info
       if (octave == OCTAVES) {
         autotune_data->use_auto_calibration_ = 0xFF; // = data available, but not used
-#ifdef AUTOTUNE_DEBUG  
-        SERIAL_PRINTLN("set auto calibration data, %d", autotune_data->use_auto_calibration_);
-#endif
+        //SERIAL_PRINTLN("set auto calibration data, %d", autotune_data->use_auto_calibration_);
       }
    }
 }
@@ -141,9 +133,7 @@ void DAC::reset_auto_channel_calibration_data(uint8_t channel_id) {
   
   // reset data
   if (channel_id < DAC_CHANNEL_LAST) {
-#ifdef AUTOTUNE_DEBUG  
     //SERIAL_PRINTLN("resetting channel# %d calibration data", (int)(channel_id + 1));
-#endif
     OC::Autotune_data *autotune_data = &OC::auto_calibration_data[channel_id];
     autotune_data->use_auto_calibration_ = 0x0;
     for (int i = 0; i < OCTAVES + 1; i++)
