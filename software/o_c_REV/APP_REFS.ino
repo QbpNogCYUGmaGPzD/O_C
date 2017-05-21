@@ -39,6 +39,8 @@ static constexpr double kAaboveMidCtoC0 = 0.03716272234383494188492;
 
 const uint8_t NUM_REF_CHANNELS = DAC_CHANNEL_LAST;
 
+bool show_voltage_scaling_ = false;
+
 enum ReferenceSetting {
   REF_SETTING_OCTAVE,
   REF_SETTING_SEMI,
@@ -50,6 +52,7 @@ enum ReferenceSetting {
   REF_SETTING_PPQN,
   REF_SETTING_AUTOTUNE,
   REF_SETTING_DUMMY,
+  REF_SETTING_SHOW_VOLTAGE_SCALING,
   REF_SETTING_VOLTAGE_SCALING,
   REF_SETTING_LAST
 };
@@ -304,7 +307,7 @@ public:
 
           switch(get_voltage_scaling()){
           /* can't use pow (busts the available memory at this point), so we unroll ... */
-            case 1: // 1.2V/octave
+            case VOLTAGE_SCALING_1_2V_PER_OCT: // 1.2V/octave
               auto_target_frequencies_[0]  =  target_frequency * 0.1767766952966368931843f;  // -3V = 2**(-3.0/1.2)
               auto_target_frequencies_[1]  =  target_frequency * 0.3149802624737182976666f;  // -2V = 2**(-2.0/1.2)
               auto_target_frequencies_[2]  =  target_frequency * 0.5612310241546865086093f;  // -1V = 2**(-1.0/1.2)
@@ -317,7 +320,7 @@ public:
               auto_target_frequencies_[9]  =  target_frequency * 32.0f;                      // +6V = 2**(6.0/1.2)
               auto_target_frequencies_[10] =  target_frequency * 57.0175179609817419645879f; // ...
               break;
-            case 2: // 2V/octave
+            case VOLTAGE_SCALING_2V_PER_OCT: // 2V/octave
               auto_target_frequencies_[0]  =  target_frequency * 0.3535533905932737863687f;  // -3V - 2**(-3.0/2.0)
               auto_target_frequencies_[1]  =  target_frequency * 0.5f;                       // -2V = 2**(-2.0/2.0)
               auto_target_frequencies_[2]  =  target_frequency * 0.7071067811865475727373f;  // -1V = 2**(-1.0/2.0)
@@ -330,7 +333,7 @@ public:
               auto_target_frequencies_[9]  =  target_frequency * 8.0f;                       // +6V = 2**(6.0/2.0)
               auto_target_frequencies_[10] =  target_frequency * 11.3137084989847611637970f; // ...
               break;
-            case 0: // 1V/octave
+            case VOLTAGE_SCALING_1V_PER_OCT: // 1V/octave
             default:
               auto_target_frequencies_[0]  =  target_frequency * 0.125f;  // -3V
               auto_target_frequencies_[1]  =  target_frequency * 0.25f;   // -2V 
@@ -481,6 +484,10 @@ public:
     }
   }
 
+  bool get_show_voltage_scaling() const {
+    return static_cast<bool>(values_[REF_SETTING_SHOW_VOLTAGE_SCALING]);
+  }
+  
   OutputVoltageScaling get_voltage_scaling() const {
     return static_cast<OutputVoltageScaling>(values_[REF_SETTING_VOLTAGE_SCALING]);
   }
@@ -534,14 +541,16 @@ public:
       *settings++ = REF_SETTING_A_ABOVE_MID_C_INTEGER;
       *settings++ = REF_SETTING_A_ABOVE_MID_C_MANTISSA;
       *settings++ = REF_SETTING_PPQN;
+      *settings++ = REF_SETTING_SHOW_VOLTAGE_SCALING;
     }
     else {
       *settings++ = REF_SETTING_DUMMY;
       *settings++ = REF_SETTING_DUMMY;
       *settings++ = REF_SETTING_DUMMY;
       *settings++ = REF_SETTING_DUMMY;
+      *settings++ = REF_SETTING_DUMMY;
     }
-    
+
 #ifdef BUCHLA_SUPPORT
       *settings++ = REF_SETTING_VOLTAGE_SCALING;
 #endif
@@ -605,6 +614,7 @@ SETTINGS_DECLARE(ReferenceChannel, REF_SETTING_LAST) {
   { CHANNEL_PPQN_4, CHANNEL_PPQN_1, CHANNEL_PPQN_LAST - 1, "> ppqn", ppqn_labels, settings::STORAGE_TYPE_U8 },
   { 0, 0, 0, "--> autotune", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 0, "-", NULL, settings::STORAGE_TYPE_U4 }, // dummy
+  { 0, 0, 1, "Show V scaling", OC::Strings::off_on, settings::STORAGE_TYPE_U8 },  
 #ifdef BUCHLA_SUPPORT
   { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }
 #else
@@ -617,7 +627,7 @@ public:
   ReferencesApp() { }
   
   OC::Autotuner<ReferenceChannel> autotuner;
-
+  
   void Init() {
     int dac_channel = DAC_CHANNEL_A;
     for (auto &channel : channels_)
@@ -633,6 +643,7 @@ public:
     freq_octave_ = 0;
     freq_note_ = 0;
     freq_decicents_residual_ = 0;
+    show_voltage_scaling_ = false ;
     autotuner.Init();
   }
 
@@ -640,6 +651,8 @@ public:
       
     for (auto &channel : channels_)
       channel.Update();
+
+    show_voltage_scaling_ = show_voltage_scaling() ;
 
     uint8_t _autotuner_active_channel = 0x0;
     for (auto &channel : channels_)
@@ -730,6 +743,10 @@ public:
 
   bool get_notes_or_bpm( ) {
     return(static_cast<bool>(channels_[DAC_CHANNEL_D].get_notes_or_bpm())) ;
+  }
+
+  bool show_voltage_scaling() {
+    return(channels_[DAC_CHANNEL_D].get_show_voltage_scaling());
   }
 
   float get_C0_freq() {

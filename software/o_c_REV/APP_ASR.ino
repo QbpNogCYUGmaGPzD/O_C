@@ -431,12 +431,12 @@ public:
       break;
     } 
 
-    #ifdef VOLTAGE_SCALING_SUPPORT
+#ifdef VOLTAGE_SCALING_SUPPORT
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_A;
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_B;
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_C;
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_D;
-    #endif
+#endif
     
     num_enabled_settings_ = settings - enabled_settings_;
   }
