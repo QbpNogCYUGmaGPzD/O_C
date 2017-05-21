@@ -307,13 +307,13 @@ const char* const scale_names[] = {
 
 const char* const voltage_scalings[] = {
     "1", // 1V/octave
-    "1.2", // 1.2V/octave Buchla
-    "2", // 2V/oct Buchla
     "a", // Wendy Carlos alpha scale
     "b", // Wendy Carlos beta scale
     "g", // Wendy Carlos gamma scale
     "tri", // Tritave (as used by Bohlen-Pierce macrotonal scale)
     "qtr" // quartertone scale (essentially dowbscales to 0.5V/oct)
+    "1.2", // 1.2V/octave Buchla
+    "2", // 2V/oct Buchla
     } ;
 
 }; // namespace OC

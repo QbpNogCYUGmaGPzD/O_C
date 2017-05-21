@@ -258,18 +258,20 @@ public:
     return static_cast<ClearMode>(values_[GRID_SETTING_CLEARMODE]);
   }
 
-  uint8_t get_voltage_scaling_a() const {
-    return values_[GRID_SETTING_VOLTAGE_SCALING_A];
+  OutputVoltageScaling get_voltage_scaling_a() const {
+    return static_cast<OutputVoltageScaling>(values_[GRID_SETTING_VOLTAGE_SCALING_A]);
   }
 
-  uint8_t get_voltage_scaling_b() const {
-    return values_[GRID_SETTING_VOLTAGE_SCALING_B];
+  OutputVoltageScaling get_voltage_scaling_b() const {
+    return static_cast<OutputVoltageScaling>(values_[GRID_SETTING_VOLTAGE_SCALING_B]);
   }
-  uint8_t get_voltage_scaling_c() const {
-    return values_[GRID_SETTING_VOLTAGE_SCALING_C];
+
+  OutputVoltageScaling get_voltage_scaling_c() const {
+    return static_cast<OutputVoltageScaling>(values_[GRID_SETTING_VOLTAGE_SCALING_C]);
   }
-  uint8_t get_voltage_scaling_d() const {
-    return values_[GRID_SETTING_VOLTAGE_SCALING_D];
+
+  OutputVoltageScaling get_voltage_scaling_d() const {
+    return static_cast<OutputVoltageScaling>(values_[GRID_SETTING_VOLTAGE_SCALING_D]);
   }
 
   // End of settings
@@ -344,15 +346,15 @@ SETTINGS_DECLARE(AutomatonnetzState, GRID_SETTING_LAST) {
   {OUTPUTA_MODE_ROOT, OUTPUTA_MODE_ROOT, OUTPUTA_MODE_LAST - 1, "OutA", outputa_mode_names, settings::STORAGE_TYPE_U4},
   {CLEAR_MODE_ZERO, CLEAR_MODE_ZERO, CLEAR_MODE_LAST - 1, "Clr", clear_mode_names, settings::STORAGE_TYPE_U4},
 #ifdef BUCHLA_SUPPORT
-  { 0, 0, 5, "A V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "B V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "C V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "D V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "A V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "B V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "C V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "D V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
 #else
-  { 0, 0, 0, "A V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 0, "B V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 0, "C V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 0, "D V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "A V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "B V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "C V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "D V/o", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
 #endif
 };
 

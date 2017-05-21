@@ -316,12 +316,12 @@ public:
     return values_[DQ_CHANNEL_SETTING_PULSEWIDTH];
   }
 
-  uint8_t get_voltage_scaling() const {
-    return values_[DQ_CHANNEL_SETTING_VOLTAGE_SCALING];
+  OutputVoltageScaling get_voltage_scaling() const {
+    return static_cast<OutputVoltageScaling>(values_[DQ_CHANNEL_SETTING_VOLTAGE_SCALING]);
   }
 
-  uint8_t get_voltage_scaling_aux() const {
-    return values_[DQ_CHANNEL_SETTING_VOLTAGE_SCALING_AUX];
+  OutputVoltageScaling get_voltage_scaling_aux() const {
+    return static_cast<OutputVoltageScaling>(values_[DQ_CHANNEL_SETTING_VOLTAGE_SCALING_AUX]);
   }
 
   uint8_t get_turing_length() const {
@@ -375,11 +375,11 @@ public:
     force_update_ = true;
     instant_update_ = false;
 
-    #ifdef BUCHLA_SUPPORT
+#ifdef VOLTAGE_SCALING_SUPPORT
       scaling_ = true;
-    #else
+#else
       scaling_ = false;
-    #endif
+#endif
     
     for (int i = 0; i < NUM_SCALE_SLOTS; i++) {
       last_scale_[i] = -1;
@@ -1146,8 +1146,13 @@ SETTINGS_DECLARE(DQ_QuantizerChannel, DQ_CHANNEL_SETTING_LAST) {
   { 0, 0, 2, " > LFSR CV", dq_tm_CV_destinations, settings::STORAGE_TYPE_U8 }, // ??
   { 15, 1, 120, " > LFSR range", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, DQ_TRIG_AUX_LAST-1, " > LFSR TRIG", dq_tm_trig_out, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 7, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#endif // BUCHLA_SUPPORT
 };
 
 // WIP refactoring to better encapsulate and for possible app interface change

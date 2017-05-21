@@ -203,8 +203,8 @@ public:
     return values_[CHANNEL_SETTING_FINE];
   }
 
-  uint8_t get_voltage_scaling() const {
-    return values_[CHANNEL_SETTING_VOLTAGE_SCALING];
+  OutputVoltageScaling get_voltage_scaling() const {
+    return static_cast<OutputVoltageScaling>(values_[CHANNEL_SETTING_VOLTAGE_SCALING]);
   }
 
   uint8_t get_aux_cv_dest() const {
@@ -373,11 +373,11 @@ public:
     apply_value(CHANNEL_SETTING_SOURCE, source);
     apply_value(CHANNEL_SETTING_TRIGGER, trigger_source);
 
-    #ifdef BUCHLA_SUPPORT
+#ifdef VOLTAGE_SCALING_SUPPORT
       scaling_ = true;
-    #else
+#else
       scaling_ = false;
-    #endif
+#endif
 
     channel_index_ = source;
     force_update_ = true;
@@ -1165,7 +1165,11 @@ SETTINGS_DECLARE(QuantizerChannel, CHANNEL_SETTING_LAST) {
   { 0, 0, 4, "IntSeq rng CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 4, "F. stride CV >", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 4, "IntSeq reset", OC::Strings::trigger_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#endif
 };
  
 // WIP refactoring to better encapsulate and for possible app interface change

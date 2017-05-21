@@ -59,12 +59,6 @@ enum ASRSettings {
   ASR_SETTING_MULT,
   ASR_SETTING_DELAY,
   ASR_SETTING_BUFFER_LENGTH,
-  #ifdef BUCHLA_SUPPORT
-  ASR_SETTING_VOLTAGE_SCALING_A,
-  ASR_SETTING_VOLTAGE_SCALING_B,
-  ASR_SETTING_VOLTAGE_SCALING_C,
-  ASR_SETTING_VOLTAGE_SCALING_D,
-  #endif
   ASR_SETTING_CV_SOURCE,
   ASR_SETTING_CV4_DESTINATION,
   ASR_SETTING_TURING_LENGTH,
@@ -82,6 +76,10 @@ enum ASRSettings {
   ASR_SETTING_INT_SEQ_DIR,
   ASR_SETTING_FRACTAL_SEQ_STRIDE,
   ASR_SETTING_INT_SEQ_CV_SOURCE,
+  ASR_SETTING_VOLTAGE_SCALING_A,
+  ASR_SETTING_VOLTAGE_SCALING_B,
+  ASR_SETTING_VOLTAGE_SCALING_C,
+  ASR_SETTING_VOLTAGE_SCALING_D,
   ASR_SETTING_LAST
 };
 
@@ -275,9 +273,8 @@ public:
     return int_seq_.get_n();
   }
 
-  #ifdef BUCHLA_SUPPORT
-  uint8_t get_voltage_scaling(int channel_i) const {
-    uint8_t value = 0;
+  OutputVoltageScaling get_voltage_scaling(int channel_i) const {
+    uint8_t value = 0 ;
     switch(channel_i) {
       case 3:
         value = values_[ASR_SETTING_VOLTAGE_SCALING_D];
@@ -292,13 +289,8 @@ public:
         value = values_[ASR_SETTING_VOLTAGE_SCALING_A];
         break;
     }
-    return value;
+    return static_cast<OutputVoltageScaling>(value);
   }
-  #else
-  uint8_t get_voltage_scaling(int channel_i) const {
-    return 0;
-  }
-  #endif
 
   void toggle_delay_mechanics() {
     delay_type_ = (~delay_type_) & 1u;
@@ -439,7 +431,7 @@ public:
       break;
     } 
 
-    #ifdef BUCHLA_SUPPORT
+    #ifdef VOLTAGE_SCALING_SUPPORT
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_A;
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_B;
       *settings++ = ASR_SETTING_VOLTAGE_SCALING_C;
@@ -797,12 +789,6 @@ SETTINGS_DECLARE(ASR, ASR_SETTING_LAST) {
   { MULT_ONE, 0, NUM_INPUT_SCALING - 1, "input gain", mult, settings::STORAGE_TYPE_U8 },
   { 0, 0, OC::kNumDelayTimes - 1, "trigger delay", OC::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
   { 4, 4, ASR_HOLD_BUF_SIZE - 1, "hold (buflen)", NULL, settings::STORAGE_TYPE_U8 },
-  #ifdef BUCHLA_SUPPORT
-  { 0, 0, 7, "Ch A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 }, 
-  { 0, 0, 7, "Ch B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 }, 
-  { 0, 0, 7, "Ch C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 }, 
-  { 0, 0, 7, "Ch D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  #endif
   { 0, 0, ASR_CHANNEL_SOURCE_LAST -1, "CV source", asr_input_sources, settings::STORAGE_TYPE_U4 },
   { 0, 0, ASR_DEST_LAST - 1, "CV4 dest. ->", asr_cv4_destinations, settings::STORAGE_TYPE_U4 },
   { 16, 1, 32, "> LFSR length", NULL, settings::STORAGE_TYPE_U8 },
@@ -819,7 +805,18 @@ SETTINGS_DECLARE(ASR, ASR_SETTING_LAST) {
   { 8, 2, 256, "> IntSeq len", NULL, settings::STORAGE_TYPE_U8 },
   { 1, 0, 1, "> IntSeq dir", OC::Strings::integer_sequence_dirs, settings::STORAGE_TYPE_U4 },
   { 1, 1, 255, "> Fract stride", NULL, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 5, "> IntSeq CV1", int_seq_CV_destinations, settings::STORAGE_TYPE_U4 }
+  { 0, 0, 5, "> IntSeq CV1", int_seq_CV_destinations, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "Ch A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "Ch B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "Ch C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "Ch D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "Ch A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "Ch B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "Ch C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }, 
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "Ch D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#endif  
 };
 
 /* -------------------------------------------------------------------*/

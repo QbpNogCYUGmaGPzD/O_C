@@ -49,9 +49,7 @@ enum ReferenceSetting {
   REF_SETTING_PPQN,
   REF_SETTING_AUTOTUNE,
   REF_SETTING_DUMMY,
-  #ifdef BUCHLA_SUPPORT
-    REF_SETTING_VOLTAGE_SCALING,
-  #endif 
+  REF_SETTING_VOLTAGE_SCALING,
   REF_SETTING_LAST
 };
 
@@ -450,12 +448,8 @@ public:
     }
   }
 
-  uint8_t get_voltage_scaling() const {
-    #ifdef BUCHLA_SUPPORT
-      return values_[REF_SETTING_VOLTAGE_SCALING];
-    #else
-      return 0x0;
-    #endif
+  OutputVoltageScaling get_voltage_scaling() const {
+    return static_cast<OutputVoltageScaling>(values_[REF_SETTING_VOLTAGE_SCALING]);
   }
  
   void Update() {
@@ -513,9 +507,9 @@ public:
       *settings++ = REF_SETTING_DUMMY;
     }
     
-    #ifdef BUCHLA_SUPPORT
+#ifdef BUCHLA_SUPPORT
       *settings++ = REF_SETTING_VOLTAGE_SCALING;
-    #endif
+#endif
      num_enabled_settings_ = settings - enabled_settings_;
   }
 
@@ -576,9 +570,11 @@ SETTINGS_DECLARE(ReferenceChannel, REF_SETTING_LAST) {
   { CHANNEL_PPQN_4, CHANNEL_PPQN_1, CHANNEL_PPQN_LAST - 1, "> ppqn", ppqn_labels, settings::STORAGE_TYPE_U8 },
   { 0, 0, 0, "--> autotune", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 0, "-", NULL, settings::STORAGE_TYPE_U4 }, // dummy
-  #ifdef BUCHLA_SUPPORT
-  { 0, 0, 2, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }
-  #endif
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, "V/octave", OC::voltage_scalings, settings::STORAGE_TYPE_U8 }
+#endif
 };
 
 class ReferencesApp {

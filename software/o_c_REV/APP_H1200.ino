@@ -211,18 +211,20 @@ public:
     return static_cast<H1200TriggerTypes>(values_[H1200_SETTING_TRIGGER_TYPE]);
   }
 
-  uint8_t get_voltage_scaling_a() const {
-    return values_[H1200_SETTING_VOLTAGE_SCALING_A];
+  OutputVoltageScaling get_voltage_scaling_a() const {
+    return static_cast<OutputVoltageScaling>(values_[H1200_SETTING_VOLTAGE_SCALING_A]);
   }
 
-  uint8_t get_voltage_scaling_b() const {
-    return values_[H1200_SETTING_VOLTAGE_SCALING_B];
+  OutputVoltageScaling get_voltage_scaling_b() const {
+    return static_cast<OutputVoltageScaling>(values_[H1200_SETTING_VOLTAGE_SCALING_B]);
   }
-  uint8_t get_voltage_scaling_c() const {
-    return values_[H1200_SETTING_VOLTAGE_SCALING_C];
+  
+  OutputVoltageScaling get_voltage_scaling_c() const {
+    return static_cast<OutputVoltageScaling>(values_[H1200_SETTING_VOLTAGE_SCALING_C]);
   }
-  uint8_t get_voltage_scaling_d() const {
-    return values_[H1200_SETTING_VOLTAGE_SCALING_D];
+  
+  OutputVoltageScaling get_voltage_scaling_d() const {
+    return static_cast<OutputVoltageScaling>(values_[H1200_SETTING_VOLTAGE_SCALING_D]);
   }
 
   uint8_t get_euclidean_cv1_mapping() const {
@@ -312,8 +314,7 @@ public:
   uint8_t get_h_euclidean_offset() const {
     return values_[H1200_SETTING_H_EUCLIDEAN_OFFSET];
   }
-
-    
+  
   void Init() {
     InitDefaults();
     update_enabled_settings();
@@ -346,12 +347,12 @@ public:
     *settings++ =   H1200_SETTING_OUTPUT_MODE;
     *settings++ =   H1200_SETTING_TRIGGER_TYPE;
     
-    #ifdef BUCHLA_SUPPORT
+#ifdef VOLTAGE_SCALING_SUPPORT
         *settings++ = H1200_SETTING_VOLTAGE_SCALING_A;
         *settings++ = H1200_SETTING_VOLTAGE_SCALING_B;
         *settings++ = H1200_SETTING_VOLTAGE_SCALING_C;
         *settings++ = H1200_SETTING_VOLTAGE_SCALING_D;
-    #endif
+#endif
  
     switch (get_trigger_type()) {
       case H1200_TRIGGER_TYPE_EUCLIDEAN:
@@ -453,10 +454,17 @@ SETTINGS_DECLARE(H1200Settings, H1200_SETTING_LAST) {
   {H1200_CV_SAMPLING_CONT, H1200_CV_SAMPLING_CONT, H1200_CV_SAMPLING_LAST-1, "CV sampling", h1200_cv_sampling, settings::STORAGE_TYPE_U4},
   {OUTPUT_CHORD_VOICING, 0, OUTPUT_MODE_LAST-1, "Output mode", output_mode_names, settings::STORAGE_TYPE_U8},
   {H1200_TRIGGER_TYPE_PLR, 0, H1200_TRIGGER_TYPE_LAST-1, "Trigger type", trigger_type_names, settings::STORAGE_TYPE_U8},
-  { 0, 0, 5, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 5, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#endif 
   {H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_LAST-1, "Eucl CV1 map", h1200_eucl_cv_mappings, settings::STORAGE_TYPE_U8},
   {H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_LAST-1, "Eucl CV2 map", h1200_eucl_cv_mappings, settings::STORAGE_TYPE_U8},
   {H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_LAST-1, "Eucl CV3 map", h1200_eucl_cv_mappings, settings::STORAGE_TYPE_U8},

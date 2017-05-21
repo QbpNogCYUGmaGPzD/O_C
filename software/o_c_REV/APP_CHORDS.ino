@@ -312,18 +312,20 @@ public:
     return values_[CHORDS_SETTING_TRIGGER_DELAY];
   }
 
-  uint8_t get_voltage_scaling_a() const {
-    return values_[CHORDS_SETTING_VOLTAGE_SCALING_A];
+  OutputVoltageScaling get_voltage_scaling_a() const {
+    return static_cast<OutputVoltageScaling>(values_[CHORDS_SETTING_VOLTAGE_SCALING_A]);
   }
 
-  uint8_t get_voltage_scaling_b() const {
-    return values_[CHORDS_SETTING_VOLTAGE_SCALING_B];
+  OutputVoltageScaling get_voltage_scaling_b() const {
+    return static_cast<OutputVoltageScaling>(values_[CHORDS_SETTING_VOLTAGE_SCALING_B]);
   }
-  uint8_t get_voltage_scaling_c() const {
-    return values_[CHORDS_SETTING_VOLTAGE_SCALING_C];
+  
+  OutputVoltageScaling get_voltage_scaling_c() const {
+    return static_cast<OutputVoltageScaling>(values_[CHORDS_SETTING_VOLTAGE_SCALING_C]);
   }
-  uint8_t get_voltage_scaling_d() const {
-    return values_[CHORDS_SETTING_VOLTAGE_SCALING_D];
+  
+  OutputVoltageScaling get_voltage_scaling_d() const {
+    return static_cast<OutputVoltageScaling>(values_[CHORDS_SETTING_VOLTAGE_SCALING_D]);
   }
 
   int get_transpose() const {
@@ -908,12 +910,12 @@ public:
         *settings++ = CHORDS_SETTING_CV_SOURCE;
         *settings++ = CHORDS_SETTING_CHORDS_ADVANCE_TRIGGER_SOURCE;
         *settings++ = CHORDS_SETTING_TRIGGER_DELAY;
-#ifdef BUCHLA_SUPPORT        
+#ifdef VOLTAGE_SCALING_SUPPORT        
         *settings++ =   CHORDS_SETTING_VOLTAGE_SCALING_A;
         *settings++ =   CHORDS_SETTING_VOLTAGE_SCALING_B;
         *settings++ =   CHORDS_SETTING_VOLTAGE_SCALING_C;
         *settings++ =   CHORDS_SETTING_VOLTAGE_SCALING_D;
-#endif // BUCHLA_SUPPORT
+#endif // VOLTAGE_SCALING_SUPPORT
       }
       break;
       case MENU_CV_MAPPING: {
@@ -1026,10 +1028,17 @@ SETTINGS_DECLARE(Chords, CHORDS_SETTING_LAST) {
   { 0, 0, CHORDS_DIRECTIONS_LAST - 1, "direction", OC::Strings::seq_directions, settings::STORAGE_TYPE_U8 },
   { 64, 0, 255, "-->brown prob", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, OC::kNumDelayTimes - 1, "TR1 delay", OC::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 7, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT  
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan A V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan B V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan C V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "chan D V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#endif // BUCHLA_SUPPORT
   { 0, -5, 7, "transpose", NULL, settings::STORAGE_TYPE_I8 },
   { 0, -4, 4, "octave", NULL, settings::STORAGE_TYPE_I8 },
   { 0, 0, OC::Chords::CHORDS_USER_LAST - 1, "chord:", chords_slots, settings::STORAGE_TYPE_U8 },

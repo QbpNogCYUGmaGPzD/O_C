@@ -146,6 +146,7 @@ enum SEQ_ChannelSetting {
   SEQ_CHANNEL_SETTING_BROWNIAN_CV,
   SEQ_CHANNEL_SETTING_LENGTH_CV,
   SEQ_CHANNEL_SETTING_DUMMY,
+  // voltage scaling
   SEQ_CHANNEL_SETTING_VOLTAGE_SCALING,
   SEQ_CHANNEL_SETTING_VOLTAGE_SCALING_AUX,
   SEQ_CHANNEL_SETTING_LAST
@@ -281,12 +282,12 @@ public:
     return values_[SEQ_CHANNEL_SETTING_OCTAVE_AUX];
   }
 
-  uint8_t get_voltage_scaling() const {
-    return values_[SEQ_CHANNEL_SETTING_VOLTAGE_SCALING];
+  OutputVoltageScaling get_voltage_scaling() const {
+    return static_cast<OutputVoltageScaling>(values_[SEQ_CHANNEL_SETTING_VOLTAGE_SCALING]);
   }
 
-  uint8_t get_voltage_scaling_aux() const {
-    return values_[SEQ_CHANNEL_SETTING_VOLTAGE_SCALING_AUX];
+  OutputVoltageScaling get_voltage_scaling_aux() const {
+    return static_cast<OutputVoltageScaling>(values_[SEQ_CHANNEL_SETTING_VOLTAGE_SCALING_AUX]);
   }
 
   int8_t get_multiplier() const {
@@ -657,11 +658,11 @@ public:
   void Init(SEQ_ChannelTriggerSource trigger_source, uint8_t id) {
     
     InitDefaults();
-    #ifdef BUCHLA_SUPPORT
+#ifdef VOLTAGE_SCALING_SUPPORT
       scaling_ = true;
-    #else
+#else
       scaling_ = false;
-    #endif
+#endif
     channel_id_ = id;
     octave_toggle_ = false;
     wait_for_EoS_ = false;
@@ -1754,10 +1755,15 @@ SETTINGS_DECLARE(SEQ_Channel, SEQ_CHANNEL_SETTING_LAST) {
   { 0, 0, 4, "-->brwn.prb ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 4, "seq.length  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 1, "-", NULL, settings::STORAGE_TYPE_U4 }, // DUMMY, use to store update behaviour
-  { 0, 0, 7, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 7, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U4 },
+#ifdef BUCHLA_SUPPORT
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_2V_PER_OCT, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#else
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "main V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+  { VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_QUARTERTONE, "--> aux V/oct", OC::voltage_scalings, settings::STORAGE_TYPE_U8 },
+#endif // BUCHLA_SUPPORT
 };
-  
+
 class SEQ_State {
 public:
   void Init() {
