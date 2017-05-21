@@ -305,9 +305,11 @@ public:
           // ... and derive target frequencies
           float target_frequency = ((auto_frequency_ + average) / (float)(kHistoryDepth + 1)); // 0V
 
+#ifdef BUCHLA_SUPPORT
           switch(get_voltage_scaling()){
           /* can't use pow (busts the available memory at this point), so we unroll ... */
             case VOLTAGE_SCALING_1_2V_PER_OCT: // 1.2V/octave
+#endif // BUCHLA_SUPPORT
               auto_target_frequencies_[0]  =  target_frequency * 0.1767766952966368931843f;  // -3V = 2**(-3.0/1.2)
               auto_target_frequencies_[1]  =  target_frequency * 0.3149802624737182976666f;  // -2V = 2**(-2.0/1.2)
               auto_target_frequencies_[2]  =  target_frequency * 0.5612310241546865086093f;  // -1V = 2**(-1.0/1.2)
@@ -319,6 +321,7 @@ public:
               auto_target_frequencies_[8]  =  target_frequency * 17.9593927729499718282113f; // +5V = 2**(5.0/1.2)
               auto_target_frequencies_[9]  =  target_frequency * 32.0f;                      // +6V = 2**(6.0/1.2)
               auto_target_frequencies_[10] =  target_frequency * 57.0175179609817419645879f; // ...
+#ifdef BUCHLA_SUPPORT
               break;
             case VOLTAGE_SCALING_2V_PER_OCT: // 2V/octave
               auto_target_frequencies_[0]  =  target_frequency * 0.3535533905932737863687f;  // -3V - 2**(-3.0/2.0)
@@ -348,6 +351,7 @@ public:
               auto_target_frequencies_[10] =  target_frequency * 128.0f;  // ...
               break;
           }
+#endif //BUCHLA_SUPPORT
           
           // reset step, and proceed:
           auto_reset_step();
